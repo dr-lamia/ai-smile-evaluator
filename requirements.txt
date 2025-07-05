@@ -3,6 +3,6 @@ opencv-python-headless
 numpy
 scikit-image
 deepface==0.0.79
-mediapipe==0.9.3.0
 matplotlib
 Pillow
+
