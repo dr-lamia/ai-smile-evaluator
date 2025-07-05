@@ -1,31 +1,40 @@
-
 import streamlit as st
 import cv2
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
-from deepface import DeepFace
-import mediapipe as mp
 from PIL import Image
 import tempfile
 import os
 
+# Optional: identity similarity using InsightFace
+try:
+    import insightface
+    from insightface.app import FaceAnalysis
+    from insightface.utils import face_align
+    face_model = FaceAnalysis(name='buffalo_l')
+    face_model.prepare(ctx_id=0)
+    use_insightface = True
+except Exception as e:
+    use_insightface = False
+    st.warning("InsightFace is not available. Facial identity check will be skipped.")
+
 st.set_page_config(page_title="AI Smile Design Evaluator", layout="wide")
 st.title("🦷 AI Smile Design Evaluator")
-st.markdown("Compare original smile design images with AI-generated videos for fidelity and facial preservation.")
+st.markdown("Upload your original and AI-generated smile images to compare.")
 
 uploaded_original = st.file_uploader("Upload Original Smile Image", type=["jpg", "jpeg", "png"], key="orig")
 uploaded_generated = st.file_uploader("Upload AI-Generated Frame", type=["jpg", "jpeg", "png"], key="gen")
 
 if uploaded_original and uploaded_generated:
-    with tempfile.NamedTemporaryFile(delete=False) as orig_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as orig_file:
         orig_path = orig_file.name
         orig_file.write(uploaded_original.read())
 
-    with tempfile.NamedTemporaryFile(delete=False) as gen_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as gen_file:
         gen_path = gen_file.name
         gen_file.write(uploaded_generated.read())
 
-    # Load and display
+    # Load and resize
     orig_img = cv2.imread(orig_path)
     gen_img = cv2.imread(gen_path)
     orig_img = cv2.resize(orig_img, (512, 512))
@@ -43,32 +52,18 @@ if uploaded_original and uploaded_generated:
     ssim_score, _ = ssim(gray_orig, gray_gen, full=True)
     st.metric("🔍 SSIM (Similarity Index)", f"{ssim_score:.4f}")
 
-    # DeepFace
-    try:
-        result = DeepFace.verify(img1_path=orig_path, img2_path=gen_path, enforce_detection=False)
-        st.metric("🧠 DeepFace Cosine Distance", f"{result['distance']:.4f}")
-        st.success("✅ Faces Match" if result['verified'] else "❌ Faces Do Not Match")
-    except Exception as e:
-        st.warning(f"DeepFace error: {e}")
-
-    # Facial Landmarks using MediaPipe
-    st.markdown("### Facial Landmarks Comparison")
-    mp_face = mp.solutions.face_mesh
-    face_mesh = mp_face.FaceMesh(static_image_mode=True)
-
-    def draw_landmarks(image):
-        results = face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        if results.multi_face_landmarks:
-            annotated = image.copy()
-            for landmarks in results.multi_face_landmarks:
-                for lm in landmarks.landmark:
-                    x, y = int(lm.x * image.shape[1]), int(lm.y * image.shape[0])
-                    cv2.circle(annotated, (x, y), 1, (0, 255, 0), -1)
-            return annotated
-        return image
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.image(draw_landmarks(orig_img)[:, :, ::-1], caption="Original Landmarks")
-    with col2:
-        st.image(draw_landmarks(gen_img)[:, :, ::-1], caption="Generated Landmarks")
+    # InsightFace Identity Match
+    if use_insightface:
+        faces_orig = face_model.get(orig_img)
+        faces_gen = face_model.get(gen_img)
+        if faces_orig and faces_gen:
+            emb1 = faces_orig[0].embedding
+            emb2 = faces_gen[0].embedding
+            cosine_similarity = np.dot(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
+            st.metric("🧠 Identity Similarity (Cosine)", f"{cosine_similarity:.4f}")
+            if cosine_similarity > 0.7:
+                st.success("✅ Faces are likely the same")
+            else:
+                st.warning("⚠️ Faces may not match closely")
+        else:
+            st.warning("Could not detect faces in one or both images.")
