@@ -1,8 +1,8 @@
 streamlit
-opencv-python-headless
 numpy
 scikit-image
-deepface
-mediapipe
+opencv-python-headless
 matplotlib
+mediapipe==0.10.9
+deepface==0.0.79
 Pillow
