@@ -2,7 +2,7 @@ streamlit
 opencv-python-headless
 numpy
 scikit-image
-deepface==0.0.79
+insightface
+onnxruntime
 matplotlib
 Pillow
-
