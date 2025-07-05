@@ -1,55 +1,48 @@
-# 🦷 AI Smile Design Evaluator
+# 🦷 AI Smile Design Evaluator (InsightFace Edition)
 
-This Streamlit app allows clinicians and researchers to compare original smile design images with AI-generated videos for fidelity and facial identity preservation.
+This Streamlit app allows dentists and researchers to compare original smile design images with AI-generated results using:
+
+- **SSIM (Structural Similarity Index)** for visual fidelity
+- **InsightFace** for facial identity similarity (cosine distance)
+- Compatible with Streamlit Cloud (no TensorFlow required)
 
 ## 🚀 Features
 
-- Upload original and AI-generated smile images
-- Compare visual similarity using **SSIM**
-- Verify facial identity using **DeepFace**
-- Visualize facial landmarks using **MediaPipe**
-- Side-by-side comparison and interactive evaluation
+- Upload and compare smile images
+- Quantify similarity and identity match
+- No need for DeepFace or TensorFlow
+- Lightweight and cloud-deployable
 
 ## 🛠️ Technologies
 
 - Streamlit
 - OpenCV
-- NumPy
 - scikit-image
-- DeepFace
-- MediaPipe
-- Pillow
+- InsightFace
+- ONNX Runtime
+- NumPy, Pillow
 
 ## 📦 Installation
 
 ```bash
 pip install -r requirements.txt
-streamlit run app_smile_evaluator.py
+streamlit run app_smile_evaluator_insightface.py
 ```
 
 ## 📂 Files
 
-| File | Description |
-|------|-------------|
-| `app_smile_evaluator.py` | Main Streamlit app |
-| `requirements.txt` | Dependencies for deployment |
-| `README.md` | Project overview |
+| File                             | Description                      |
+|----------------------------------|----------------------------------|
+| `app_smile_evaluator_insightface.py` | Main Streamlit app using InsightFace |
+| `requirements.txt`               | Cloud-safe dependencies          |
+| `README.md`                      | Project documentation            |
 
 ## 🌐 Deployment
 
-You can deploy this app on [Streamlit Cloud](https://streamlit.io/cloud):
-1. Upload files to a public GitHub repository.
-2. Open Streamlit Cloud.
-3. Select your repo and set `app_smile_evaluator.py` as the app entry.
-4. Done!
-
-## 👩‍⚕️ Use Case
-
-Designed for dentists, prosthodontists, and researchers working with:
-- Digital Smile Design (DSD)
-- AI-generated smile animation
-- Patient engagement in aesthetic dentistry
+This app is ready to deploy on [Streamlit Cloud](https://streamlit.io/cloud):
+1. Upload all files to a public GitHub repository.
+2. Deploy by selecting `app_smile_evaluator_insightface.py` as the entry point.
 
 ---
 
-Developed for AI in Dentistry research and education.
+Developed for AI-based digital smile design evaluations.
